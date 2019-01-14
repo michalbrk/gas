@@ -9,7 +9,7 @@ const vApp = createElement('div', {
         'Hei Verden',
         createElement('img', {
             attrs: {
-                src: 'https://media.giphy.com/media/ECSalSdhUhRcI/giphy.gif'
+                src: 'https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif'
             }
         })
     ]

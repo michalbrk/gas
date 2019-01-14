@@ -220,7 +220,7 @@ var vApp = (0, _createElement.default)('div', {
   },
   children: ['Hei Verden', (0, _createElement.default)('img', {
     attrs: {
-      src: 'https://media.giphy.com/media/ECSalSdhUhRcI/giphy.gif'
+      src: 'https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif'
     }
   })]
 });
