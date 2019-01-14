@@ -122,28 +122,111 @@ var _default = function _default(tagName) {
       _ref$children = _ref.children,
       children = _ref$children === void 0 ? [] : _ref$children;
 
-  return {
+  //A trully plain object that doesn't inherit
+  //from Object but from null instead
+  var vElem = Object.create(null);
+  Object.assign(vElem, {
     tagName: tagName,
     attrs: attrs,
     children: children
-  };
+  });
+  return vElem;
 };
 
+exports.default = _default;
+},{}],"render.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+var renderEl = function renderEl(_ref) {
+  var tagName = _ref.tagName,
+      attrs = _ref.attrs,
+      children = _ref.children;
+  var $el = document.createElement(tagName); //Add all the attributes
+
+  var _arr = Object.entries(attrs);
+
+  for (var _i = 0; _i < _arr.length; _i++) {
+    var _arr$_i = _slicedToArray(_arr[_i], 2),
+        k = _arr$_i[0],
+        v = _arr$_i[1];
+
+    $el.setAttribute(k, v);
+  } //Append all the children
+
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var child = _step.value;
+      $el.appendChild(render(child));
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return != null) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return $el;
+};
+
+var render = function render(vNode) {
+  if (typeof vNode === 'string') {
+    return document.createTextNode(vNode);
+  } //Everything else is a virtual element
+
+
+  return renderEl(vNode);
+};
+
+var _default = render;
 exports.default = _default;
 },{}],"main.js":[function(require,module,exports) {
 "use strict";
 
 var _createElement = _interopRequireDefault(require("./createElement"));
 
+var _render = _interopRequireDefault(require("./render"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var vApp = (0, _createElement.default)('div', {
   attrs: {
     id: 'app'
-  }
+  },
+  children: ['Hei Verden', (0, _createElement.default)('img', {
+    attrs: {
+      src: 'https://media.giphy.com/media/ECSalSdhUhRcI/giphy.gif'
+    }
+  })]
 });
+var $app = (0, _render.default)(vApp);
 console.log(vApp);
-},{"./createElement":"createElement.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./createElement":"createElement.js","./render":"render.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -170,7 +253,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49534" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56085" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
