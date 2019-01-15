@@ -205,28 +205,116 @@ var render = function render(vNode) {
 
 var _default = render;
 exports.default = _default;
-},{}],"main.js":[function(require,module,exports) {
+},{}],"mount.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _default = function _default($node, $target) {
+  //Replacing empty div element with the
+  //$app one
+  $target.replaceWith($node);
+  return $node;
+};
+
+exports.default = _default;
+},{}],"diff.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _render = _interopRequireDefault(require("./render"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var diff = function diff(oldVTree, newVTree) {
+  if (newVTree === 'undefined') {
+    return function ($node) {
+      //Patch should return a new root node
+      $node.remove();
+      return undefined;
+    };
+  }
+
+  if (typeof oldVTree === 'string' || typeof newVTree === 'string') {
+    if (oldVTree !== newVTree) {
+      //1. Both trees are strings and have different values
+      //2. One of them is text node and 2nd the element node
+      return function ($node) {
+        var $newNode = (0, _render.default)(newVTree);
+        $node.replaceWith($newNode);
+        return $newNode;
+      };
+    } else {
+      return function ($node) {
+        return $node;
+      };
+    }
+  }
+
+  if (oldVTree.tagName !== newVTree.tagName) {
+    //When tottaly different render the new tree
+    //and mount it
+    return function ($node) {
+      var $newNode = (0, _render.default)(newVTree);
+      $node.replaceWith($newNode);
+      return $newNode;
+    };
+  }
+};
+
+var _default = diff;
+exports.default = _default;
+},{"./render":"render.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
 var _createElement = _interopRequireDefault(require("./createElement"));
 
 var _render = _interopRequireDefault(require("./render"));
 
+var _mount = _interopRequireDefault(require("./mount"));
+
+var _diff = _interopRequireDefault(require("./diff"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var vApp = (0, _createElement.default)('div', {
-  attrs: {
-    id: 'app'
-  },
-  children: ['Hei Verden', (0, _createElement.default)('img', {
+function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
+
+var createVApp = function createVApp(count) {
+  return (0, _createElement.default)('div', {
     attrs: {
-      src: 'https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif'
-    }
-  })]
-});
-var $app = (0, _render.default)(vApp);
-console.log(vApp);
-},{"./createElement":"createElement.js","./render":"render.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+      id: 'app',
+      dataCount: count
+    },
+    children: ['The current count is: ', String(count), (0, _createElement.default)('img', {
+      attrs: {
+        src: 'https://media.giphy.com/media/ECSalSdhUhRcI/giphy.gif'
+      }
+    })]
+  });
+};
+
+var count = 0;
+var vApp = createVApp(count);
+var $app = (0, _render.default)(vApp); //Mount $app to the empty div
+
+var $rootEl = (0, _mount.default)($app, document.getElementById('app'));
+setInterval(function () {
+  count++;
+  var vNewApp = createVApp(count);
+  var patch = (0, _diff.default)(vApp, vNewApp); //Patch will return the new $rootEl in case
+  //the whole $rootEl will be replaced
+
+  $rootEl = patch($rootEl);
+  vApp = (_readOnlyError("vApp"), vNewApp);
+}, 1000);
+},{"./createElement":"createElement.js","./render":"render.js","./mount":"mount.js","./diff":"diff.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -253,7 +341,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56085" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63068" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
