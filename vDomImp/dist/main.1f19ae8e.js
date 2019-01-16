@@ -233,6 +233,64 @@ var _render = _interopRequireDefault(require("./render"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+var diffAttrs = function diffAttrs(oldAttrs, newAttrs) {
+  var patches = []; //Setting new ones
+
+  var _arr = Object.entries(newAttrs);
+
+  var _loop2 = function _loop2() {
+    var _arr$_i = _slicedToArray(_arr[_i], 2),
+        k = _arr$_i[0],
+        v = _arr$_i[1];
+
+    patches.push(function ($node) {
+      $node.setAttribute(k, v);
+      return $node;
+    });
+  };
+
+  for (var _i = 0; _i < _arr.length; _i++) {
+    _loop2();
+  } //Removing old ones
+
+
+  var _loop = function _loop(k) {
+    if (!(k in newAttrs)) {
+      patches.push(function ($node) {
+        $node.removeAttribute(k);
+        return $node;
+      });
+    }
+  };
+
+  for (var k in oldAttrs) {
+    _loop(k);
+  }
+
+  return function ($node) {
+    for (var _i2 = 0; _i2 < patches.length; _i2++) {
+      var patch = patches[_i2];
+      patch($node);
+    }
+
+    return $node;
+  };
+};
+
+var diffChildren = function diffChildren(oldVChildren, newVChildren) {
+  return function ($node) {
+    return $node;
+  };
+};
+
 var diff = function diff(oldVTree, newVTree) {
   if (newVTree === 'undefined') {
     return function ($node) {
@@ -267,6 +325,14 @@ var diff = function diff(oldVTree, newVTree) {
       return $newNode;
     };
   }
+
+  var patchAttrs = diffAttrs(oldVTree.attrs, newVTree.attrs);
+  var patchCildren = diffChildren(oldVChildren.children, newVChildren.children);
+  return function ($node) {
+    patchAttrs($node);
+    patchCildren($node);
+    return $node;
+  };
 };
 
 var _default = diff;
@@ -341,7 +407,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63068" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62626" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
