@@ -1,5 +1,16 @@
 import render from './render'
 
+const zip = (xs, ys) => {
+    
+    const zipped = []
+    
+    for(let i = 0; i < Math.min(xs.length, ys.length); i++) {
+        zipped.push([xs[i]], [ys[i]])
+    }
+
+    return zipped
+}
+
 const diffAttrs = (oldAttrs, newAttrs) => {
     const patches = []
 
@@ -30,8 +41,35 @@ const diffAttrs = (oldAttrs, newAttrs) => {
 }
 
 const diffChildren = (oldVChildren, newVChildren) => {
-    return $node => {
-        return $node
+
+    const childPatches = []
+
+    oldVChildren.forEach((oldVChild, i) => {
+        childPatches.push(diff(oldVChild, newVChildren[i]))
+    });
+
+    const additionalPatches = []
+    for(const additionalVChild of newVChildren.slice(oldVChildren.length)) {
+        additionalPatches.push($node => {
+            $node.appendChild(render(newVChildren))
+            return $node
+        })
+    }
+
+    return $parent => {
+        $parent.childNodes.forEach(($child, i) => {
+            childPatches[i]($child)
+        })
+
+        for(const [patch, $child] of zip(childPatches, $parent.childNodes)) {
+            patch($child)
+        }
+
+        for(const patch of additionalPatches) {
+            patch($parent)
+        }
+
+        return $parent
     }
 }
 
