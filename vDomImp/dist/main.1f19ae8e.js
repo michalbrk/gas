@@ -104,7 +104,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({"createElement.js":[function(require,module,exports) {
+})({"JS/createElement.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -134,7 +134,7 @@ var _default = function _default(tagName) {
 };
 
 exports.default = _default;
-},{}],"render.js":[function(require,module,exports) {
+},{}],"JS/render.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -205,7 +205,7 @@ var render = function render(vNode) {
 
 var _default = render;
 exports.default = _default;
-},{}],"mount.js":[function(require,module,exports) {
+},{}],"JS/mount.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -221,7 +221,7 @@ var _default = function _default($node, $target) {
 };
 
 exports.default = _default;
-},{}],"diff.js":[function(require,module,exports) {
+},{}],"JS/diff.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -241,15 +241,101 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+var zip = function zip(xs, ys) {
+  var zipped = [];
+
+  for (var i = 0; i < Math.min(xs.length, ys.length); i++) {
+    zipped.push([xs[i], ys[i]]);
+  }
+
+  return zipped;
+};
+
+var diffChildren = function diffChildren(oldVChildren, newVChildren) {
+  var childPatches = [];
+  oldVChildren.forEach(function (oldVChild, i) {
+    childPatches.push(diff(oldVChild, newVChildren[i]));
+  });
+  var additionalPatches = [];
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    var _loop = function _loop() {
+      var additionalVChild = _step.value;
+      additionalPatches.push(function ($node) {
+        $node.appendChild((0, _render.default)(additionalVChild));
+        return $node;
+      });
+    };
+
+    for (var _iterator = newVChildren.slice(oldVChildren.length)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      _loop();
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return != null) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return function ($parent) {
+    // since childPatches are expecting the $child, not $parent,
+    // we cannot just loop through them and call patch($parent)
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = zip(childPatches, $parent.childNodes)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var _step2$value = _slicedToArray(_step2.value, 2),
+            patch = _step2$value[0],
+            $child = _step2$value[1];
+
+        patch($child);
+      }
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
+          _iterator2.return();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
+
+    for (var _i = 0; _i < additionalPatches.length; _i++) {
+      var patch = additionalPatches[_i];
+      patch($parent);
+    }
+
+    return $parent;
+  };
+};
+
 var diffAttrs = function diffAttrs(oldAttrs, newAttrs) {
-  var patches = []; //Setting new ones
+  var patches = []; // setting newAttrs
 
-  var _arr = Object.entries(newAttrs);
+  var _arr2 = Object.entries(newAttrs);
 
-  var _loop2 = function _loop2() {
-    var _arr$_i = _slicedToArray(_arr[_i], 2),
-        k = _arr$_i[0],
-        v = _arr$_i[1];
+  var _loop3 = function _loop3() {
+    var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
+        k = _arr2$_i[0],
+        v = _arr2$_i[1];
 
     patches.push(function ($node) {
       $node.setAttribute(k, v);
@@ -257,12 +343,12 @@ var diffAttrs = function diffAttrs(oldAttrs, newAttrs) {
     });
   };
 
-  for (var _i = 0; _i < _arr.length; _i++) {
-    _loop2();
-  } //Removing old ones
+  for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+    _loop3();
+  } // removing attrs
 
 
-  var _loop = function _loop(k) {
+  var _loop2 = function _loop2(k) {
     if (!(k in newAttrs)) {
       patches.push(function ($node) {
         $node.removeAttribute(k);
@@ -272,12 +358,12 @@ var diffAttrs = function diffAttrs(oldAttrs, newAttrs) {
   };
 
   for (var k in oldAttrs) {
-    _loop(k);
+    _loop2(k);
   }
 
   return function ($node) {
-    for (var _i2 = 0; _i2 < patches.length; _i2++) {
-      var patch = patches[_i2];
+    for (var _i3 = 0; _i3 < patches.length; _i3++) {
+      var patch = patches[_i3];
       patch($node);
     }
 
@@ -285,31 +371,33 @@ var diffAttrs = function diffAttrs(oldAttrs, newAttrs) {
   };
 };
 
-var diffChildren = function diffChildren(oldVChildren, newVChildren) {
-  return function ($node) {
-    return $node;
-  };
-};
-
 var diff = function diff(oldVTree, newVTree) {
-  if (newVTree === 'undefined') {
+  // let's assume oldVTree is not undefined!
+  if (newVTree === undefined) {
     return function ($node) {
-      //Patch should return a new root node
-      $node.remove();
+      $node.remove(); // the patch should return the new root node.
+      // since there is none in this case,
+      // we will just return undefined.
+
       return undefined;
     };
   }
 
   if (typeof oldVTree === 'string' || typeof newVTree === 'string') {
     if (oldVTree !== newVTree) {
-      //1. Both trees are strings and have different values
-      //2. One of them is text node and 2nd the element node
+      // could be 2 cases:
+      // 1. both trees are string and they have different values
+      // 2. one of the trees is text node and
+      //    the other one is elem node
+      // Either case, we will just render(newVTree)!
       return function ($node) {
         var $newNode = (0, _render.default)(newVTree);
         $node.replaceWith($newNode);
         return $newNode;
       };
     } else {
+      // this means that both trees are string
+      // and they have the same values
       return function ($node) {
         return $node;
       };
@@ -317,8 +405,9 @@ var diff = function diff(oldVTree, newVTree) {
   }
 
   if (oldVTree.tagName !== newVTree.tagName) {
-    //When tottaly different render the new tree
-    //and mount it
+    // we assume that they are totally different and
+    // will not attempt to find the differences.
+    // simply render the newVTree and mount it.
     return function ($node) {
       var $newNode = (0, _render.default)(newVTree);
       $node.replaceWith($newNode);
@@ -327,28 +416,36 @@ var diff = function diff(oldVTree, newVTree) {
   }
 
   var patchAttrs = diffAttrs(oldVTree.attrs, newVTree.attrs);
-  var patchCildren = diffChildren(oldVChildren.children, newVChildren.children);
+  var patchChildren = diffChildren(oldVTree.children, newVTree.children);
   return function ($node) {
     patchAttrs($node);
-    patchCildren($node);
+    patchChildren($node);
     return $node;
   };
 };
 
 var _default = diff;
 exports.default = _default;
-},{"./render":"render.js"}],"main.js":[function(require,module,exports) {
+},{"./render":"JS/render.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
-var _createElement = _interopRequireDefault(require("./createElement"));
+var _createElement = _interopRequireDefault(require("./JS/createElement"));
 
-var _render = _interopRequireDefault(require("./render"));
+var _render = _interopRequireDefault(require("./JS/render"));
 
-var _mount = _interopRequireDefault(require("./mount"));
+var _mount = _interopRequireDefault(require("./JS/mount"));
 
-var _diff = _interopRequireDefault(require("./diff"));
+var _diff = _interopRequireDefault(require("./JS/diff"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
 
@@ -358,29 +455,32 @@ var createVApp = function createVApp(count) {
       id: 'app',
       dataCount: count
     },
-    children: ['The current count is: ', String(count), (0, _createElement.default)('img', {
-      attrs: {
-        src: 'https://media.giphy.com/media/ECSalSdhUhRcI/giphy.gif'
-      }
-    })]
+    children: ['The current count is: ', String(count)].concat(_toConsumableArray(Array.from({
+      length: count
+    }, function () {
+      return (0, _createElement.default)('img', {
+        attrs: {
+          src: 'https://media.giphy.com/media/ECSalSdhUhRcI/giphy.gif'
+        }
+      });
+    })))
   });
 };
 
-var count = 0;
-var vApp = createVApp(count);
+var vApp = createVApp(0);
 var $app = (0, _render.default)(vApp); //Mount $app to the empty div
 
 var $rootEl = (0, _mount.default)($app, document.getElementById('app'));
 setInterval(function () {
-  count++;
-  var vNewApp = createVApp(count);
+  var n = Math.floor(Math.random() * 10);
+  var vNewApp = createVApp(n);
   var patch = (0, _diff.default)(vApp, vNewApp); //Patch will return the new $rootEl in case
   //the whole $rootEl will be replaced
 
   $rootEl = patch($rootEl);
   vApp = (_readOnlyError("vApp"), vNewApp);
 }, 1000);
-},{"./createElement":"createElement.js","./render":"render.js","./mount":"mount.js","./diff":"diff.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./JS/createElement":"JS/createElement.js","./JS/render":"JS/render.js","./JS/mount":"JS/mount.js","./JS/diff":"JS/diff.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -407,7 +507,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62626" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51129" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
