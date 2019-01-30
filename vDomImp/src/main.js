@@ -23,8 +23,12 @@ const vApp = createVApp(0)
 const $app = render(vApp)
 
 //Mount $app to the empty div
+//The $rootEl is keeping track
+//where to mount the App.
 let $rootEl = mount($app, document.getElementById('app'))
 
+//Incrementing count; creating, rendering
+//and mounting the App.
 setInterval(() => {
     const n = Math.floor(Math.random() * 10)
     const vNewApp = createVApp(n)

@@ -65,6 +65,12 @@ const diffAttrs = (oldAttrs, newAttrs) => {
   };
 };
 
+
+//Diff function that calculates differences
+//between 2 virtual trees.
+//Patch makes changes in the real DOM
+//making oldVTree look like newVTree
+
 const diff = (oldVTree, newVTree) => {
   // let's assume oldVTree is not undefined!
   if (newVTree === undefined) {
@@ -116,5 +122,11 @@ const diff = (oldVTree, newVTree) => {
     return $node;
   };
 };
+
+//At this point code implies the following:
+//oldVTree and newVTree are both virtual elements.
+//They have the same tagName.
+//They might have different attrs and children.
+
 
 export default diff;
